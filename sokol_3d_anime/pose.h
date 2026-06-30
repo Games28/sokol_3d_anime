@@ -24,7 +24,12 @@ struct Pose {
 
 			//parse bone matrix
 			cmn::mat4 m;
-			for (int i = 0; i < 16; i++) line_str >> m(i % 4,i / 4);
+			for (int i = 0; i < 16; i++)
+			{
+				int x = i % 4;
+				int y = i / 4;
+				line_str >> m(y, x);
+			}
 
 			pose.mat_pose.push_back(m);
 		}

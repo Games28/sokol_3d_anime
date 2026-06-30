@@ -226,12 +226,7 @@ class Demo : public cmn::SokolEngine {
 
 	void UpdateAnimation(Mesh & mesh ,float t) {
 
-		//get corresponding pose from slider
-		int pose_ix = poses.size() * pose_slider.t;
-		const auto& pose = poses[pose_ix % poses.size()];
-		//std::vector<Mat4> mat_pose = armature.calculateAnimationPose(pose.mat_pose);
-
-		//get pose from slider
+		
 		std::vector<cmn::mat4> mat_pose;
 		{
 			//get left and right anim
@@ -253,11 +248,13 @@ class Demo : public cmn::SokolEngine {
 			for (int i = 0; i < num; i++) {
 				const auto& a = mat_pose1[i];
 				const auto& b = mat_pose2[i];
+
+
 				mat_pose.push_back(a + (b - a) * t);
 			}
 			
-			std::vector<cmn::vf3d> new_verts(mesh.verts.size());
-			for (int i = 0; i < mesh.verts.size(); i++) {
+			
+			for (int i = 0; i < mesh.bind_to_verts.size(); i++) {
 				float w = 1;
 				const auto& vd = vertex_data[i];
 				cmn::mat4 mat_anim;
@@ -267,13 +264,15 @@ class Demo : public cmn::SokolEngine {
 					mat_anim = mat_anim + m * w;
 
 				}
-				cmn::mat4 mat_total = cmn::mat4::mul(mat_anim, mesh.mat_world);
-				new_verts[i] = cmn::matMulVec(mat_total,mesh.verts[i],w);
+				cmn::mat4 mat_total = cmn::mat4::mul(mesh.mat_world,mat_anim);
+				mesh.bind_to_verts[i] = cmn::matMulVec(mat_total ,mesh.verts[i], w);
 			}
 
-			for (int i = 0; i < mesh.verts.size(); i++)
+			mesh.render_verts.clear();
+			for (int i = 0; i < mesh.bind_to_verts.size(); i++)
 			{
-				mesh.verts[i] = new_verts[i];
+				mesh.render_verts.push_back( mesh.bind_to_verts[i] );
+				
 			}
 		
 		
@@ -285,24 +284,30 @@ class Demo : public cmn::SokolEngine {
 
 		seg_timer += dt;
 
+		float t = seg_timer / time_per_seg;
+
 		if (seg_timer > time_per_seg)
 		{
 			seg_timer = 0;
-
-			float t = seg_timer / time_per_seg;
-
-			for (auto& m : meshes)
-			{
+			for (auto& m : meshes) {
 				m.translation = { 0,0,0 };
-				m.rotation.y = cmn::Pi / 2;
-				
-
+				m.rotation.z = cmn::Pi / 3;
 				m.updateTransforms();
-				UpdateAnimation(m, t);
 
 			}
+			
 		}
+		
 
+		for (auto& m : meshes)
+		{
+			
+
+
+			
+			UpdateAnimation(m, t);
+
+		}
 		
 
 		return true;
@@ -315,9 +320,9 @@ class Demo : public cmn::SokolEngine {
 
 		for (const auto& t : m.tris)
 		{
-			const auto& a = m.verts[t.ix[0]];
-			const auto& b = m.verts[t.ix[1]];
-			const auto& c = m.verts[t.ix[2]];
+			const auto& a = m.render_verts[t.ix[0]];
+			const auto& b = m.render_verts[t.ix[1]];
+			const auto& c = m.render_verts[t.ix[2]];
 
 			vf3d ab = b - a, ac = c - a;
 			vf3d norm = normalize(cross(ab, ac));

@@ -20,7 +20,7 @@ float random() {
 }
 
 struct Mesh {
-	std::vector<cmn::vf3d> verts;
+	std::vector<cmn::vf3d> verts, bind_to_verts, render_verts;
 	std::vector<IndexTriangle> tris;
 	cmn::vf3d rotation, scale{ 1,1,1 }, translation;
 	cmn::mat4 mat_world;
@@ -33,7 +33,7 @@ struct Mesh {
 		cmn::mat4 mat_rot = cmn::mat4::mul( mat_rot_z,cmn::mat4::mul(mat_rot_x, mat_rot_y));
 		cmn::mat4 mat_scale = cmn::mat4::makeScale(scale);
 		cmn::mat4 mat_trans = cmn::mat4::makeTranslation(translation);
-		mat_world = cmn::mat4::mul(mat_scale, cmn::mat4::mul(mat_trans,mat_rot));
+		mat_world = cmn::mat4::mul(mat_trans, cmn::mat4::mul(mat_scale,mat_rot));
 	}
 
 	static bool loadFromOBJ(Mesh& m, const std::string& filename) {
@@ -50,6 +50,8 @@ struct Mesh {
 				cmn::vf3d v;
 				line_str >> v.x >> v.y >> v.z;
 				m.verts.push_back(v);
+				m.bind_to_verts.push_back(v);
+				m.render_verts.push_back(v);
 
 			}
 			else if (type == "f") {
@@ -76,6 +78,8 @@ struct Mesh {
 		}
 
 		file.close();
+
+		
 
 		return true;
 	}

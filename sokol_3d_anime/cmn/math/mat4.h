@@ -59,13 +59,13 @@ namespace cmn {
 		static mat4 mul(const mat4& lhs, const mat4& rhs) {
 			mat4 res;
 			//basically a lot of corresponding dot products...
-			for(int r=0; r<4; r++) {
-				for(int c=0; c<4; c++) {
-					res(r, c)=
-						lhs(r, 0)*rhs(0, c)+
-						lhs(r, 1)*rhs(1, c)+
-						lhs(r, 2)*rhs(2, c)+
-						lhs(r, 3)*rhs(3, c);
+			for (int r = 0; r < 4; r++) {
+				for (int c = 0; c < 4; c++) {
+					res(r, c) =
+						lhs(r, 0) * rhs(0, c) +
+						lhs(r, 1) * rhs(1, c) +
+						lhs(r, 2) * rhs(2, c) +
+						lhs(r, 3) * rhs(3, c);
 				}
 			}
 			return res;
@@ -74,6 +74,22 @@ namespace cmn {
 		static mat4 mul(const mat4& m, float f) {
 			mat4 res;
 			for(int i=0; i<16; i++) res.m[i]=f*m.m[i];
+			return res;
+		}
+
+		
+		static mat4 anim_mul(const mat4& lhs, const mat4& rhs) {
+			mat4 res;
+			//basically a lot of corresponding dot products...
+			for (int r = 0; r < 4; r++) {
+				for (int c = 0; c < 4; c++) {
+					res(c, r) =
+						lhs(0, r) * rhs(c, 0) +
+						lhs(1, r) * rhs(c, 1) +
+						lhs(2, r) * rhs(c, 2) +
+						lhs(3, r) * rhs(c, 3);
+				}
+			}
 			return res;
 		}
 
